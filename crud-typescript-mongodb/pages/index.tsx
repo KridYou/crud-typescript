@@ -1,57 +1,54 @@
-import Head from 'next/head'
-import { useState } from 'react'
-import clientPromise from '../lib/mongodb'
-import { InferGetServerSidePropsType } from 'next'
-import Layout from '../components/Layout'
+import Head from "next/head";
+import { useState } from "react";
+import clientPromise from "../lib/mongodb";
+import { InferGetServerSidePropsType } from "next";
+import Layout from "../components/Layout";
 
 type Props = {
-  posts: [Post]
-}
+  posts: [Post];
+};
 
 type Post = {
   _id: String;
-  title: String;
-  content: String;
-}
+  name: String;
+  detail: String;
+};
 
 export async function getServerSideProps() {
-
   try {
     let response = await fetch("http://localhost:3000/api/getPosts");
     let posts = await response.json();
 
     return {
-      props: { posts: JSON.parse(JSON.stringify(posts)) }
-    }
-
-  } catch(e) {
+      props: { posts: JSON.parse(JSON.stringify(posts)) },
+    };
+  } catch (e) {
     console.error(e);
   }
-
 }
 
 export default function Home(props: Props) {
-
   const [posts, setPosts] = useState<[Post]>(props.posts);
 
   const handleDeletePost = async (postId: string) => {
     try {
-
-      let response = await fetch("http://localhost:3000/api/deletePost?id=" + postId, {
-        method: "POST",
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json"
+      let response = await fetch(
+        "http://localhost:3000/api/deletePost?id=" + postId,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+          },
         }
-      })
+      );
 
       response = await response.json();
       window.location.reload();
-
-    } catch(error) {
+    } catch (error) {
       console.log("An error occured while deleting ", error);
     }
-  }
+  };
 
   return (
     <div className="container">
@@ -61,72 +58,73 @@ export default function Home(props: Props) {
       </Head>
 
       <Layout>
-        <div className='posts-body'>
-          <h1 className='posts-body-heading'>Top 20 posts</h1>
+        <div className="posts-body">
+          <h1 className="posts-body-heading">Patience lists</h1>
           {posts?.length > 0 ? (
-            <ul className='posts-list'>
+            <ul className="posts-list">
               {posts.map((post, index) => {
                 return (
                   <li key={index} className="post-item">
-                    <div className='post-item-details'>
-                      <h2>{post.title}</h2>
-                      <p>{post.content}</p>
+                    <div className="post-item-details">
+                      <div>
+                        <h2>Name:</h2>
+                        <h2>{post.name}</h2>
+                      </div>
+                      <div>
+                        <p>Detail:</p>
+                        <p>{post.detail}</p>
+                      </div>
                     </div>
-                    <div className='post-item-actions'>
-                      <a href={`/posts/${post._id}`}>Edit</a>
-                      <button onClick={() => handleDeletePost(post._id as string)}>Delete</button>
+                    <div className="post-item-actions">
+                      <button className="btn-edit">
+                        <a href={`/posts/${post._id}`}>Edit</a>
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeletePost(post._id as string)}
+                      >
+                        Delete
+                      </button>
                     </div>
                   </li>
-                )
+                );
               })}
             </ul>
           ) : (
-            <h2 className='posts-body-heading'>Ooops! No posts...</h2>
+            <h2 className="posts-body-heading">No patience</h2>
           )}
         </div>
       </Layout>
 
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className="logo" />
-        </a>
-      </footer>
-
       <style jsx>{`
-       
-          .posts-body {
-            width: 400px;
-            margin: 10px auto;
-          }
+        .posts-body {
+          width: 400px;
+          margin: 10px auto;
+        }
 
-          .posts-body-heading {
-            font-family: sans-serif;
-          }
+        .posts-body-heading {
+          font-family: sans-serif;
+        }
 
-          .posts-list {
-            list-style: none;
-            display: block;
-          }
+        .posts-list {
+          list-style: none;
+          display: block;
+        }
 
-          .post-item {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d5d5d5;
-          }
+        .post-item {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #d5d5d5;
+        }
 
-          .post-item-actions {
-            display: flex;
-            justify-content: space-between;
-          }
+        .post-item-actions {
+          display: flex;
+          justify-content: space-between;
+        }
 
-          .post-item-actions a {
-            text-decoration: none;
-          }
+        .post-item-actions a {
+          text-decoration: none;
+        }
 
         footer {
           width: 100%;
@@ -242,6 +240,14 @@ export default function Home(props: Props) {
             flex-direction: column;
           }
         }
+
+        .btn-edit {
+          background: #5e6e77;
+        }
+
+        .btn-delete {
+          background: #f61400;
+        }
       `}</style>
 
       <style jsx global>{`
@@ -259,5 +265,5 @@ export default function Home(props: Props) {
         }
       `}</style>
     </div>
-  )
+  );
 }
